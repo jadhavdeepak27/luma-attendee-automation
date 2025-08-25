@@ -1,0 +1,45 @@
+"""
+Luma Attendee Automation POC
+Author: Marc-style micro-swarm
+Purpose: Demo workflow for scraping, enriching, CRM push, and outreach
+"""
+
+import json
+from string import Template
+
+# -----------------------------
+# Step 0: Configuration
+# -----------------------------
+CONFIG = {
+    "hubspot_api_key": "YOUR_HUBSPOT_API_KEY",
+    "sendgrid_api_key": "YOUR_SENDGRID_API_KEY",
+    "sendgrid_from_email": "you@example.com"
+}
+
+# -----------------------------
+# Step 1: Scrape Luma Attendee List (mocked)
+# -----------------------------
+def scrape_luma_attendee():
+    """
+    For POC, we mock a single attendee.
+    """
+    attendee = {
+        "name": "Alice Johnson",
+        "company": "ExampleCorp",
+        "title": "Product Manager",
+        "event": "Luma 2025 Conference"
+    }
+    print(f"[Scrape] Got attendee: {attendee}")
+    return attendee
+
+# -----------------------------
+# Step 2: Enrich Attendee Data
+# -----------------------------
+def enrich_attendee(attendee):
+    """
+    Demo enrichment using mocked APIs (replace with Clearbit/Apollo/PhantomBuster)
+    """
+    enrichment = {
+        "email": "alice.johnson@example.com",
+        "linkedin": "https://linkedin.com/in/alicejohnson",
+        "twitter": "@alice_johnson"_
