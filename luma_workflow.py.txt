@@ -1,0 +1,100 @@
+Luma Event Attendee Automation Workflow
+
+Steps:
+1. Scrape attendees from Luma
+2. Enrich with LinkedIn/Twitter using Clearbit
+3. Push into CRM (HubSpot)
+4. Trigger personalized email sequence
+
+Author: Your Name
+"""
+
+import pandas as pd
+import requests
+
+# -------------------------------
+# Step 1: Load Attendee List (Scraping placeholder)
+# -------------------------------
+def load_attendees(file_path='sample_attendees.csv'):
+    """
+    Load attendee list from CSV (mock scraping)
+    """
+    df = pd.read_csv(file_path)
+    print(f"Loaded {len(df)} attendees")
+    return df
+
+# -------------------------------
+# Step 2: Enrichment with Clearbit
+# -------------------------------
+def enrich_attendees(df, clearbit_api_key):
+    """
+    Enrich attendees with LinkedIn and Twitter info using Clearbit
+    """
+    import clearbit
+    clearbit.key = clearbit_api_key
+    enriched_data = []
+
+    for idx, row in df.iterrows():
+        response = clearbit.Person.find(email=row['email'], stream=True)
+        enriched_data.append({
+            'name': row['name'],
+            'email': row['email'],
+            'linkedin': response.get('linkedin', {}).get('handle') if response else None,
+            'twitter': response.get('twitter', {}).get('handle') if response else None
+        })
+    enriched_df = pd.DataFrame(enriched_data)
+    enriched_df.to_csv('enriched_attendees.csv', index=False)
+    print("Enrichment complete, saved to enriched_attendees.csv")
+    return enriched_df
+
+# -------------------------------
+# Step 3: Push into HubSpot CRM
+# -------------------------------
+def push_to_hubspot(df, hubspot_api_key):
+    """
+    Push enriched contacts into HubSpot CRM
+    """
+    for idx, row in df.iterrows():
+        payload = {
+            "properties": {
+                "email": row['email'],
+                "firstname": row['name'].split()[0],
+                "lastname": row['name'].split()[-1],
+                "linkedin": row['linkedin'],
+                "twitter": row['twitter']
+            }
+        }
+        r = requests.post(
+            f'https://api.hubapi.com/crm/v3/objects/contacts?hapikey={hubspot_api_key}',
+            json=payload
+        )
+        print(f"{row['email']} - Status: {r.status_code}")
+
+# -------------------------------
+# Step 4: Trigger Email Sequence (Placeholder)
+# -------------------------------
+def trigger_email_sequence(df):
+    """
+    Placeholder: send personalized emails
+    """
+    for idx, row in df.iterrows():
+        print(f"Email to {row['email']}: Hi {row['name'].split()[0]}, check out our new updates!")
+
+
+# -------------------------------
+# Main Workflow
+# -------------------------------
+if __name__ == "__main__":
+    # Load sample attendees
+    attendees_df = load_attendees()
+
+    # Clearbit API Key
+    CLEARBIT_API_KEY = 'YOUR_CLEARBIT_API_KEY'
+    enriched_df = enrich_attendees(attendees_df, CLEARBIT_API_KEY)
+
+    # HubSpot API Key
+    HUBSPOT_API_KEY = 'YOUR_HUBSPOT_API_KEY'
+    push_to_hubspot(enriched_df, HUBSPOT_API_KEY)
+
+    # Trigger email sequence
+    trigger_email_sequence(enriched_df)
